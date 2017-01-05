@@ -81,16 +81,18 @@ Now, suppose we have a matrix $V\in\mathbb{R}^{N\times M}$ and a function $g(M)$
 
 \begin{equation}
 \label{matcalc}
-\left( \frac{\partial f}{\partial V}\right)_{i j}=\frac{\partial g}{\partial V_{i j}}.
+\left( \frac{\partial g}{\partial V}\right)_{i j}=\frac{\partial g}{\partial V_{i j}}.
 \end{equation}
 
-\section{Gradient Calculations}
-The parameters of our RNN are $U, V$, and $W$, so we must compute the gradient of our loss function with respect to these matrices. Recall our definition \eqref{oneloss} where $E_t=-y_t\log\hat{y}_t$. Using our new summation notation, we can write this as:
+\noindent Now we can use our new summation notation to clarify definition \eqref{oneloss} for our loss function as
 
 \begin{equation}
 \label{einloss}
 E_t=-y_{t_i}\log{\hat{y}_{t_i}}
 \end{equation}
+
+\section{Gradient Calculations}
+The parameters of our RNN are $U, V$, and $W$, so we must compute the gradient of our loss function with respect to these matrices. This will be done in order of increasing difficulty.
 
 \subsection{V}
 The parameter $V$ is present only in the function $\hat{y}$. Let $q_t=V s_t$. Then,
