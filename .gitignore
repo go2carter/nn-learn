@@ -1,0 +1,9 @@
+*.log
+*.gz
+*.out
+
+# looks like these are latex extensions #
+#########################################
+*.aux
+*.fdb_latexmk
+*.fls
