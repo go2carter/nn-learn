@@ -19,6 +19,7 @@
 \author{Carter N Brown}
 \date{%
     January 4, 2017\\%
+    Last Edited: June 6, 2017
 }% delete this line to display the current date
 
 \begin{document}
@@ -107,7 +108,7 @@ The parameter $V$ is present only in the function $\hat{y}$. Let $q_t=V s_t$. Th
 \frac{\partial E_t}{\partial \hat{y}_{t_k}}=-\frac{y_{t_k}}{\hat{y}_{t_k}}.
 \end{equation}
 
-\noindent Our function $\hat{y}$ is just the sigmoid function, so
+\noindent Our function $\hat{y}$ is just the softmax function, so
 
 \begin{subequations}
 \begin{align}
@@ -131,7 +132,7 @@ The parameter $V$ is present only in the function $\hat{y}$. Let $q_t=V s_t$. Th
 \noindent Putting together \eqref{e8} and \eqref{e9} gives us a sum over all values of $k$ to obtain $\frac{\partial E_t}{\partial q_{t_l}}$:
 \begin{subequations}
 \begin{align}
--\frac{y_{t_l}}{\hat{y}_{t_l}}\left(\hat{y}_{t_l}\left(1-\hat{y}_{t_l}\right)+\sum_{k\ne l}{}\left(-\frac{y_{t_k}}{\hat{y}_{t_k}}\right)\left(-\hat{y}_{t_k}\hat{y}_{t_l}\right)  \right)
+-\frac{y_{t_l}}{\hat{y}_{t_l}}\hat{y}_{t_l}\left(1-\hat{y}_{t_l}\right)+\sum_{k\ne l}{}\left(-\frac{y_{t_k}}{\hat{y}_{t_k}}\right)\left(-\hat{y}_{t_k}\hat{y}_{t_l}\right) 
 &= -y_{t_l}+y_{t_l}\hat{y}_{t_l}+\sum_{k\ne l}{}y_{t_k}\hat{y}_{t_l} \\
 &= -y_{t_l} + \hat{y}_{t_l}\sum_{k}{}y_{t_k}.
 \end{align}
