@@ -108,25 +108,17 @@ The parameter $V$ is present only in the function $\hat{y}$. Let $q_t=V s_t$. Th
 \frac{\partial E_t}{\partial \hat{y}_{t_k}}=-\frac{y_{t_k}}{\hat{y}_{t_k}}.
 \end{equation}
 
-\noindent Our function $\hat{y}$ is just the softmax function, so
+\noindent Our function $\hat{y}$ is just the softmax function and has the same gradient as sigmoid, so
 
-\begin{subequations}
-\begin{align}
-\frac{\partial \hat{y}_{t_k}}{\partial q_{t_l}}&=\left\{
-	\begin{array}{lr}
-	-\sigmoid(q_t)_k\sigmoid(q_t)_l, & k\neq l \\
-	\sigmoid(q_t)_k\left(1-\sigmoid(q_t)_k\right), & k=l
-	\end{array}
-	\right. \\
+\begin{equation}
 \label{e9}
-&=\left\{
+\frac{\partial \hat{y}_{t_k}}{\partial q_{t_l}}=\left\{
 	\begin{array}{lr}
 	-\hat{y}_{t_k}\hat{y}_{t_l}, & k\neq l \\
 	\hat{y}_{t_k}\left(1-\hat{y}_{t_k}\right), & k=l
 	\end{array}
 	\right..
-\end{align}
-\end{subequations}
+\end{equation}
 
 
 \noindent Putting together \eqref{e8} and \eqref{e9} gives us a sum over all values of $k$ to obtain $\frac{\partial E_t}{\partial q_{t_l}}$:
