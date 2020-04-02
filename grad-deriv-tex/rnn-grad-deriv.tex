@@ -17,10 +17,11 @@
 
 \title{Gradients for an RNN}
 \author{Carter N Brown}
-\date{%
+\date{
+%
     January 4, 2017\\%
-    Last Edited: June 6, 2017
-}% delete this line to display the current date
+    Last Edited: \today
+}
 
 \begin{document}
 \maketitle
@@ -64,15 +65,44 @@ E_t=-y_t\log\hat{y}_t.
 
 \subsection{Math Recap}
 The important math concepts here are \href{http://planetmath.org/einsteinsummationconvention}{Einstein Summation}, chain rule, and matrix derivatives. For the summation notation, we won't be concerned with the dual basis, i.e. all indices will be on the bottom of the variable for ease. N.B. we will not denote vectors or matrices with either arrows or boldface.
+\subsubsection{Chain Rule Recap and Intuition}
+Settings : 
+For example, suppose we have a function $F(x,y,z)$ where $x,y, z\in \mathbb{R}^N$. Furthermore, suppose that $x$, $y$ and $z$ are functions of $r\in\mathbb{R}$, i.e. $x=x(r)$ , $y=y(r)$ and $z=z(r)$. Then,
 
-Einstein summation notation is useful here to help manage the chain rule and matrix derivatives. For example, suppose we have a function $f(x,y)$ where $x,y\in \mathbb{R}^N$. Furthermore, suppose that $x$ and $y$ are functions of $r\in\mathbb{R}$, i.e. $x=x(r)$ and $y=y(r)$. Then,
+\begin{equation}
+    \label{chain_2}
+    \frac{dF(x(r), y(r), z(r))}{dr} = \frac{\partial F}{\partial x}\frac{dx}{dr} + \frac{\partial F}{\partial y}\frac{dy}{dr} + \frac{\partial F}{\partial z}\frac{dz}{dy}
+\end{equation}
+
+The intuition with the chain rule is that, since the function F depend on $x, y, z$ and $x, y, z $ are functions of r.
+
+\begin{equation}
+    \label{chain_explanation}
+    \frac{dF}{dr} = \text{gradient from } x + \text{gradient from } y + \text{gradient from } z
+\end{equation}
+
+It means , the total derivate of $F$ with respect of $r$  is equal to : 
+
+\begin{itemize}
+    \item the partial derivative of F with the respect of $r$ considering $y, z$ as constants plus,
+    
+    \item the partial derivative of F with the respect of $r$ considering $x, z$ as constants plus, 
+    
+     \item the partial derivative of F with the respect of $r$ considering $x, y$ as constants, 
+\end{itemize}
+
+Keeping that in mind will help us later when we will calculate the derivatives of  cost  function.
+
+\subsubsection{Einstein summation}
+Einstein summation notation is useful here to help manage the chain rule and matrix derivatives. Using the same settings as above, with indices , the equation in \eqref{chain_2} can be written as : 
 
 \begin{equation}
 \label{chain}
-\frac{\partial f}{\partial r}=\frac{\partial f}{\partial x_i}\frac{\partial x_i}{\partial r}+\frac{\partial f}{\partial y_j}\frac{\partial y_j}{\partial r}
+\frac{\partial f}{\partial r}=\frac{\partial f}{\partial x_i}\frac{\partial x_i}{\partial r}+\frac{\partial f}{\partial y_j}\frac{\partial y_j}{\partial r}+\frac{\partial f}{\partial z_k}\frac{\partial z_k}{\partial r}
 \end{equation}
 
-\noindent where we sum over the dummy indices $i$ and $j$. Here "dummy" means that they're only being summed over, i.e. they aren't a key part of the definition. An example of an index that isn't a dummy is $m$ in the equation $v_m=T_{m n} u_n$ (while $n$ is a dummy index).
+
+\noindent where we sum over the dummy indices $i$ , $j$ and $k$. Here "dummy" means that they're only being summed over, i.e. they aren't a key part of the definition. An example of an index that isn't a dummy is $m$ in the equation $v_m=T_{m n} u_n$ (while $n$ is a dummy index).
 
 A useful sanity checks is whether the left and right sides of the equation have the same free indices, i.e. indices that are not summed over. In our chain rule example \eqref{chain} the left side has no indices, and the right side has no free indices. In our second example, with $v_m$, both the left and right have $m$ as a free index and no others.
 
@@ -161,45 +191,74 @@ The parameter $V$ is present only in the function $\hat{y}$. Let $q_t=V s_t$. Th
 \subsection{W}
 The parameter $W$ appears in the argument for $s_t$, so we will have to check the gradient in both $s_t$ and $\hat{y}_t$. We must also make note that $\hat{y}_t$ depends on $W$ both directly and indirectly (through $s_{t-1}$). Let $z_t=Ux_t+Ws_{t-1}$. Then $s_t=\tanh(z_t)$.
 
-\noindent At first it seems that by the chain rule we have:
+\noindent So we are calculating : \frac{\partial E_t}{\partial W_{ij}}
+
+From the chain rule expalained in the equation \eqref{chain_2} we can rewrite the derivate like this :
 
 \begin{equation}
-\frac{\partial E_t}{\partial W_{ij}}=\frac{\partial E_t}{\partial \hat{y}_{t_k}}\frac{\partial \hat{y}_{t_k}}{\partial q_{t_l}}\frac{\partial q_{t_l}}{\partial s_{t_m}}\frac{\partial s_{t_m}}{\partial W_{ij}}
+    \label{error_with_w}
+    \frac{\partial E_3(s_1(W), s_2(W), s_3(W))}{\partial W} = \frac{\partial E}{\partial s_1}\frac{\partial s_1}{\partial W} + \frac{\partial E}{\partial s_2}\frac{\partial s_2}{\partial W} + \frac{\partial E}{\partial s_3}\frac{\partial s_3}{\partial W}
 \end{equation}
 
-\noindent Note that of these four terms, we have already calculated the first two, and the third is simple:
-\begin{subequations}
-\begin{align}
-\frac{\partial q_{t_l}}{\partial s_{t_m}} &= \frac{\partial }{\partial s_{t_m}}\left(V_{lb}s_{t_b}\right) \\
-&= V_{lb}\delta_{bm} \\
-&= V_{lm}.
-\end{align}
-\end{subequations}
+If we take each apart we will have something like :
 
-\noindent The final term, however, requires us to notice that there is an implicit dependence of $s_t$ on $W_{ij}$ through $s_{t-1}$ as well as a direct dependence. Hence, we have
 \begin{equation}
-\frac{\partial s_{t_m}}{\partial W_{ij}} \rightarrow \frac{\partial s_{t_m}}{\partial W_{ij}}+\frac{\partial s_{t_m}}{\partial s_{{t-1}_n}}\frac{\partial s_{{t-1}_n}}{\partial W_{ij}}.
+    \frac{\partial E}{\partial s_1}\frac{\partial s_1}{\partial W} = 
+    \frac{\partial E_3}{\partial y_3} \frac{\partial y_3}{\partial q_l} \frac{\partial q_l}{\partial s_3} \frac{\partial s_3}{\partial s_2}\frac{\partial s_2}{\partial s_1}\frac{\partial s_1}{\partial W}  
 \end{equation}
 
-\noindent But we can just apply this again to yield:
 \begin{equation}
-\label{longchain}
-\frac{\partial s_{t_m}}{\partial W_{ij}} \rightarrow \frac{\partial s_{t_m}}{\partial W_{ij}}
-	+\frac{\partial s_{t_m}}{\partial s_{{t-1}_n}}\frac{\partial s_{{t-1}_n}}{\partial W_{ij}}
-	+\frac{\partial s_{t_m}}{\partial s_{{t-1}_n}}\frac{\partial s_{{t-1}_n}}{\partial s_{{t-2}_p}}\frac{\partial s_{{t-2}_p}}{\partial W_{ij}}.
+    \frac{\partial E}{\partial s_2}\frac{\partial s_2}{\partial W} = 
+    \frac{\partial E_3}{\partial y_3} \frac{\partial y_3}{\partial q_l} \frac{\partial q_l}{\partial s_3} \frac{\partial s_3}{\partial s_2}\frac{\partial s_2}{\partial W}  
 \end{equation}
 
-\noindent This process continues until we reach $s_{-1}$, which was initialized to a vector of zeros. Notice that the last term in \eqref{longchain} collapses to $\frac{\partial s_{t_m}}{\partial s_{{t-2}_n}}\frac{\partial s_{{t-2}_n}}{\partial W_{ij}}$ and we can turn the first term into $\frac{\partial s_{t_m}}{\partial s_{t_n}}\frac{\partial s_{t_n}}{\partial W_{ij}}$. Then, we arrive at the compact form
 \begin{equation}
-\frac{\partial s_{t_m}}{\partial W_{ij}}=\frac{\partial s_{t_m}}{\partial s_{r_n}}\frac{\partial s_{r_n}}{\partial W_{ij}},
+    \frac{\partial E}{\partial s_3}\frac{\partial s_3}{\partial W} = 
+    \frac{\partial E_3}{\partial y_3} \frac{\partial y_3}{\partial q_l} \frac{\partial q_l}{\partial s_3} \frac{\partial s_3}{\partial W}  
 \end{equation}
 
-\noindent where we sum over all values of $r$ less than $t$ in addition to the standard dummy index $n$. More clearly, this is written as:
+Conbining the 3 equations above we have :
+
+\begin{equation}
+    \frac{\partial E_3(s_1(W), s_2(W), s_3(W))}{\partial W} = 
+     (\frac{\partial E_3}{\partial y_3} \frac{\partial y_3}{\partial q_l} \frac{\partial q_l}{\partial s_3} ) (
+      \frac{\partial s_3}{\partial W}  +
+     \frac{\partial s_3}{\partial s_2}\frac{\partial s_2}{\partial W}+
+     \frac{\partial s_3}{\partial s_2}\frac{\partial s_2}{\partial s_1}\frac{\partial s_1}{\partial W}
+     ) 
+\end{equation}
+
+It can be rewritten in this form :
+
+\begin{equation}
+     \frac{\partial E_3(s_1(W), s_2(W), s_3(W))}{\partial W} &= 
+     (\frac{\partial E_3}{\partial y_3} \frac{\partial y_3}{\partial q_l} \frac{\partial q_l}{\partial s_3} ) (
+     \frac{\partial s_3}{\partial W}  +
+     \frac{\partial s_3}{\partial s_2}\frac{\partial s_2}{\partial W}+
+     \frac{\partial s_3}{\partial s_1}\frac{\partial s_1}{\partial W}
+     ), then &=
+     \begin{subequations}
+       \begin{align}
+           (\frac{\partial E_3}{\partial y_3} \frac{\partial y_3}{\partial q_l} \frac{\partial q_l}{\partial s_3} )(\sum_{r=0}^{t-1}\frac{\partial s_{3}}{\partial s_{r}}\frac{\partial s_{r}}{\partial W})
+       \end{align}
+     \end{subequations}
+\end{equation}
+
+\noindent Using indices and sumations where we sum over all values of $r$ less than $t$ in addition to the standard dummy index $n$. More clearly, the last summation is written as:
 \begin{equation}
 \frac{\partial s_{t_m}}{\partial W_{ij}}=\sum_{r=0}^{t}\frac{\partial s_{t_m}}{\partial s_{r_n}}\frac{\partial s_{r_n}}{\partial W_{ij}},
 \end{equation}
 
+
 \noindent which the referenced WildML tutorial indicates as the term responsible for the vanishing gradient problem.
+
+\noindent In the first part  , we have already calculated the first two, and the third is simple:
+\begin{equation}
+\frac{\partial q_{t_l}}{\partial s_{t_m}} &= \frac{\partial }{\partial s_{t_m}}\left(V_{lb}s_{t_b}\right) \\
+&= V_{lb}\delta_{bm} \\
+&= V_{lm}.
+\end{equation}
+
 
 \noindent Combining all of these yields:
 \begin{equation}
